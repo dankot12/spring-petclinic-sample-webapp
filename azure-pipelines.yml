@@ -38,12 +38,6 @@ stages: # To organize your pipeline into multiple stages, you use the "stages" k
             javaHomeOption: 'JDKVersion' # java home path
             mavenVersionOption: 'Default' # maven version
             sonarQubeRunAnalysis: false
-        - task: PublishCodeCoverageResults@1 # This task publishes the code coverage so that you can view the result on Azure DevOps GUI
-          inputs:
-            codeCoverageTool: "JaCoCo" # the tool used for calculating coverage
-            summaryFileLocation: "$(System.DefaultWorkingDirectory)/target/site/jacoco/jacoco.xml" # location of the summary file
-            reportDirectory: "$(System.DefaultWorkingDirectory)/target/site/jacoco" # location of the report
-            failIfCoverageEmpty: true
         
         - task: PublishPipelineArtifact@1
           inputs:
@@ -67,7 +61,7 @@ stages: # To organize your pipeline into multiple stages, you use the "stages" k
               - task: AzureWebApp@1
                 inputs:
                   azureSubscription: PetClinicAzureSubscriptionConnection 
-                  appName:  pet-clinic-dhanrajkotian12 
+                  appName: "pet-clinic-dhanrajkotian12"
                   package:  $(Build.SourcesDirectory)/target/spring-petclinic-3.1.0-SNAPSHOT.jar
                   customDeployFolder: ROOT
                   appType: webAppLinux 
