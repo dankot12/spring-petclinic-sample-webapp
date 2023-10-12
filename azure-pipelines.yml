@@ -62,7 +62,7 @@ stages: # To organize your pipeline into multiple stages, you use the "stages" k
                 inputs:
                   azureSubscription: AzureSubscriptionConnection 
                   appName: "pet-clinic-dhanrajkotian12"
-                  package:  $(Build.SourcesDirectory)/target/spring-petclinic-3.1.0-SNAPSHOT.jar
+                  package:  $(Pipeline.Workspace)/buildCode/target/spring-petclinic-3.1.0-SNAPSHOT.jar
                   customDeployFolder: ROOT
                   appType: webAppLinux 
               
