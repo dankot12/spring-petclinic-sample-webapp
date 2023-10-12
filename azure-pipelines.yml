@@ -53,3 +53,22 @@ stages: # To organize your pipeline into multiple stages, you use the "stages" k
             # Description: Location of file/folder that needs to shared with the next stage
             # TODO: replace <target_location> with the location of file/folder i.e., the location of source directory
             targetPath: $(Build.SourcesDirectory)
+  - stage: Deployment
+    dependsOn: Build
+    jobs:
+    - deployment: production 
+      pool:
+        vmImage: ubuntu-latest
+      environment: Development 
+      strategy:
+        runOnce: # TODO: replace <strategy_name> with the name of strategy we are using
+          deploy:
+            steps: # you will complete 1 task in the next subtask
+              - task: AzureWebApp@1
+                inputs:
+                  azureSubscription: PetClinicAzureSubscriptionConnection 
+                  appName:  pet-clinic-dhanrajkotian12 
+                  package:  $(Build.SourcesDirectory)/target/spring-petclinic-3.1.0-SNAPSHOT.jar
+                  customDeployFolder: ROOT
+                  appType: webAppLinux 
+                  
