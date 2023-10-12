@@ -10,15 +10,46 @@ pool:
   vmImage: ubuntu-latest
 
 
-steps:
-- task: Maven@4
-  inputs:
-    mavenPomFile: 'pom.xml'
-    goals: 'verify'
-    publishJUnitResults: true
-    testResultsFiles: '**/surefire-reports/TEST-*.xml'
-    javaHomeOption: 'JDKVersion'
-    mavenVersionOption: 'Default'
-    mavenAuthenticateFeed: false
-    effectivePomSkip: false
-    sonarQubeRunAnalysis: false
+stages: # To organize your pipeline into multiple stages, you use the "stages" keyword.
+  - stage: Build # name of the stage.
+    # Your pipeline may have multiple jobs.
+    # In the simplest case, a pipeline has a single job. In that case, you do not have to explicitly use the job keyword.
+    # However, you can use the job keyword to specify additional properties on that job.
+    jobs:
+    - job: Build # name of the job.
+      # When your build or deployment runs, the system begins one or more jobs.
+      # An agent is an installable software that runs one job at a time.
+      # The pool keyword specifies which pool to use for a job of the pipeline.
+      # There can be different type of pools.
+      # You can specify it at the pipeline, stage, or job level. However, the pool specified at the lowest level of the hierarchy will be used to run the job.
+      pool:
+        vmImage: 'ubuntu-latest'
+      continueOnError: false # The job will not continue on error.
+      steps: # Steps consist of tasks that execute in a linear sequence.
+        - task: Maven@3 # the name of the task
+          inputs: # the inputs of the task
+            mavenOptions: '-Xmx3072m' # default maven option
+            jdkVersionOption: '1.17' # Java JDK version
+            jdkArchitectureOption: 'x64' # Java architecture option. This parameter is optional.
+            goals: 'package -Dbuild.version=$(Build.BuildNumber)' # similar to run "mvn package" locally
+            mavenPomFile: 'pom.xml' # location of POM file
+            publishJUnitResults: true # publish results of JUnit
+            testResultsFiles: '**/surefire-reports/TEST-*.xml' # which test files needs to consider for code coverage
+            javaHomeOption: 'JDKVersion' # java home path
+            mavenVersionOption: 'Default' # maven version
+            sonarQubeRunAnalysis: false
+        - task: PublishCodeCoverageResults@1 # This task publishes the code coverage so that you can view the result on Azure DevOps GUI
+          inputs:
+            codeCoverageTool: "JaCoCo" # the tool used for calculating coverage
+            summaryFileLocation: "$(System.DefaultWorkingDirectory)/target/site/jacoco/jacoco.xml" # location of the summary file
+            reportDirectory: "$(System.DefaultWorkingDirectory)/target/site/jacoco" # location of the report
+            failIfCoverageEmpty: true
+        
+        - task: PublishPipelineArtifact@1
+          inputs:
+            # Description: Name of the artifact to be used in next stage
+            # TODO: replace <artifact_name> with the name of artifact
+            artifactName: buildCode
+            # Description: Location of file/folder that needs to shared with the next stage
+            # TODO: replace <target_location> with the location of file/folder i.e., the location of source directory
+            targetPath: $(Build.SourcesDirectory)
